@@ -7,6 +7,7 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BlogModule } from './blog/blog.module';
+import { ImagesController } from './images/images.controller';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { BlogModule } from './blog/blog.module';
     }),
     BlogModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, ImagesController],
   providers: [AppService],
 })
 export class AppModule {}
