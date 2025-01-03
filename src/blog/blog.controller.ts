@@ -11,21 +11,23 @@ import {
   Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
-import { Request } from 'express';
+import { ApiConsumes } from '@nestjs/swagger';
 
 @Controller('blog')
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
   private getImageUrl(request: Request, file: Express.Multer.File): string {
-    return `${request.protocol}://${request.get('host')}/uploads/${file.filename}`;
+    return `${request.protocol}://${request.get('host')}/images/${file.filename}`;
   }
 
   @Post()
   @UseInterceptors(FileInterceptor('image', { dest: './uploads' }))
+  @ApiConsumes('multipart/form-data')
   async create(
     @Body() createBlogDto: CreateBlogDto,
     @UploadedFile() file: Express.Multer.File,
