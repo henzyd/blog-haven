@@ -8,27 +8,33 @@ import {
   Delete,
   UploadedFile,
   UseInterceptors,
+  Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { BlogService } from './blog.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { Request } from 'express';
 
 @Controller('blog')
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
+  private getImageUrl(request: Request, file: Express.Multer.File): string {
+    return `${request.protocol}://${request.get('host')}/uploads/${file.filename}`;
+  }
+
   @Post()
-  @UseInterceptors(
-    FileInterceptor('image', {
-      dest: './uploads',
-    }),
-  )
+  @UseInterceptors(FileInterceptor('image', { dest: './uploads' }))
   async create(
     @Body() createBlogDto: CreateBlogDto,
-    @UploadedFile() image: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() request: Request,
   ) {
-    return this.blogService.create({ ...createBlogDto, image });
+    if (file) {
+      createBlogDto.image = this.getImageUrl(request, file);
+    }
+    return this.blogService.create(createBlogDto);
   }
 
   @Get()
@@ -42,7 +48,16 @@ export class BlogController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
+  @UseInterceptors(FileInterceptor('image', { dest: './uploads' }))
+  async update(
+    @Param('id') id: string,
+    @Body() updateBlogDto: UpdateBlogDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() request: Request,
+  ) {
+    if (file) {
+      updateBlogDto.image = this.getImageUrl(request, file);
+    }
     return this.blogService.update(id, updateBlogDto);
   }
 

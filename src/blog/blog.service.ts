@@ -12,15 +12,13 @@ export class BlogService {
     private blogsRepository: Repository<Blog>,
   ) {}
 
-  async create(createBlogDto: CreateBlogDto): Promise<Blog> {
-    const { image, ...data } = createBlogDto;
-
-    const blog = this.blogsRepository.create({ ...data, image: image.path });
-    return await this.blogsRepository.save(blog);
+  create(createBlogDto: CreateBlogDto): Promise<Blog> {
+    const blog = this.blogsRepository.create(createBlogDto);
+    return this.blogsRepository.save(blog);
   }
 
-  async findAll(): Promise<Blog[]> {
-    return await this.blogsRepository.find({
+  findAll(): Promise<Blog[]> {
+    return this.blogsRepository.find({
       order: {
         created_at: 'DESC',
       },
@@ -31,13 +29,10 @@ export class BlogService {
     return this.blogsRepository.findOneBy({ id });
   }
 
-  async update(id: string, updateBlogDto: UpdateBlogDto) {
-    const blog = await this.blogsRepository.findOneBy({ id });
-    if (!blog) {
-      throw new NotFoundException(`Blog with ID ${id} not found`);
-    }
-    const { image, ...data } = updateBlogDto;
-    return this.blogsRepository.update(id, { ...data, image: image?.path });
+  async update(id: string, updateBlogDto: UpdateBlogDto): Promise<Blog> {
+    const blog = await this.findOne(id);
+    const updatedBlog = this.blogsRepository.merge(blog, updateBlogDto);
+    return this.blogsRepository.save(updatedBlog);
   }
 
   async remove(id: string) {

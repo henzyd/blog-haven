@@ -20,7 +20,11 @@ export class CreateBlogDto {
   })
   subtitle: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: 'string',
+    format: 'binary',
+    required: false,
+  })
   @IsOptional()
-  image?: Express.Multer.File;
+  image?: string;
 }
